@@ -1,41 +1,41 @@
-const Product = require("../models/Product");
+const Service = require("../models/Service");
 const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("../verifyToken");
 
 const router = require("express").Router();
 
-//CREATE PRODUCT
+//CREATE Service
 let newPrice=0;
+
+
 router.post("/", async (req,res)=>{
    
     try {
-        const priceProduct= req.body.price;
+        const priceService= req.body.price;
     
         
-        if (priceProduct > 1000 && priceProduct <= 5000) {
-          newPrice = 0.12 * priceProduct + priceProduct;
-        } else if (priceProduct > 8000) {
-          newPrice = 0.18 * priceProduct + priceProduct;
-        } else {
-          newPrice = 200 + priceProduct;
-        }
-    
-     
-           req.body.price=newPrice;
-
-        const newProduct = new Product(req.body);
-        const savedProduct = await newProduct.save();
-        res.status(200).json(savedProduct);
+            if (priceService > 1000 && priceService <= 8000) {
+              newPrice = 0.1 * priceService + priceService;
+            } else if (priceService > 8000) {
+              newPrice = 0.15 * priceService + priceService;
+            } else {
+              newPrice = 100 + priceService;
+            }
+        
+         
+        req.body.price=newPrice;
+        const newService = new Service(req.body);
+        const savedService = await newService.save();
+        res.status(200).json(savedService);
     } catch (err) {
         res.status(500).json(err);
     }
 })
 
 
-
 //GET 
 router.get("/find/:id", async(req,res)=>{
     try {
-        const product = await Product.findById(req.params.id);
+        const service = await Service.findById(req.params.id);
         res.status(200).json(product); 
     } catch (err) {
         res.status(500).json(err);
@@ -49,17 +49,17 @@ router.get("/", async(req,res)=>{
     const qCategory = req.query.category;
 
     try {
-        let products;
+        let services;
         if(qNew){
-            products = await Product.find().sort({createdAt:-1}).limit(10);
+            services = await Service.find().sort({createdAt:-1}).limit(10);
         }
         else if(qCategory){
-            products = await Product.find({categories:{
+            services = await Service.find({categories:{
                 $in: [qCategory],
             }})
         }
         else{
-            products = await Product.find();
+            services = await Service.find();
         }
 
         res.status(200).json(products); 
@@ -72,20 +72,17 @@ router.get("/", async(req,res)=>{
 //UPDATE
 router.put("/:id",verifyTokenAndAuthorization,async (req,res)=>{
     if(req.body.password){
-        password = CryptoJS.AES.encrypt(
-            req.body.password,
-            process.env.SECRET_KEY
-            ).toString();
+        password = req.body.password;
     }
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(
+        const updatedService = await Service.findByIdAndUpdate(
             req.params.id,
             {
             $set: req.body,
             },
             {new:true}
         );
-        res.status(200).json(updatedProduct);
+        res.status(200).json(updatedService);
     } catch (err) {
         res.status(500).json(err);
     }
@@ -96,7 +93,7 @@ router.put("/:id",verifyTokenAndAuthorization,async (req,res)=>{
 
 router.delete("/:id",verifyTokenAndAuthorization, async(req,res)=>{
     try {
-        await Product.findByIdAndDelete(req.params.id)
+        await Service.findByIdAndDelete(req.params.id)
         res.status(200).json("Product has been deleted!"); 
     } catch (err) {
         res.status(500).json(err);
