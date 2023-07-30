@@ -1,6 +1,6 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
-
+const User = require("../models/User");
 
 const router = require("express").Router();
 
@@ -31,7 +31,20 @@ router.post("/", async (req, res) => {
 //         res.status(500).json(err);
 //     }
 // })
-
+router.get("/getallorders/:id", async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (user.isAdmin) {
+        const orders = await Order.find();
+        res.status(200).json(orders);
+      } else {
+        res.send("you are not aunthenticated");
+        res.status(500).json(err);
+      }
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  });
 router.get("/bill/:userId", async (req, res) => {
   try {
     const carts = await Cart.aggregate([
