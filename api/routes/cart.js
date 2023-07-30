@@ -1,3 +1,4 @@
+const { ConnectionClosedEvent } = require("mongodb");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const Service = require("../models/Service");
@@ -85,6 +86,24 @@ router.put("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
+router.put("/clearthecart/:id", async (req, res) => {
+  try {
+    const updatedCart = await Cart.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          "products": [],
+          "totalsum": 0
+        },
+      },
+      { new: true }
+    );
+    
+    res.status(200).json(updatedCart);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 router.put("/addtocart/:id", async (req, res) => {
   try {
     const productID = req.body.productID;
@@ -96,7 +115,13 @@ router.put("/addtocart/:id", async (req, res) => {
 
     const price = product.price;
     const quantity = req.body.quantity;
-    console.log(price);
+   //console.log(price);
+    // const carts = await Cart.aggregate([
+    //   { $addFields: { totalsum: { $sum: "$products.price" } } },
+    //   { $out: "carts" },
+    // ]);
+    const cart= await Cart.findById(req.params.id).exec();
+    const totalsumprice= cart.totalsum+(quantity*price);
     const updatedCart = await Cart.findByIdAndUpdate(
       req.params.id,
       {
@@ -107,10 +132,20 @@ router.put("/addtocart/:id", async (req, res) => {
             price: price
           },
         },
+        $set : {
+          totalsum:
+           totalsumprice
+            
+          
+        }
+  
         // $set :{ totalsum : price}
       },
       { new: true }
     );
+
+  //  updatedCart.products.price=updatedCart.products.price+price;
+  //  console.log(updatedCart.products["price"])
     res.status(200).json(updatedCart);
   } catch (err) {
     res.status(500).json(err);
@@ -119,9 +154,15 @@ router.put("/addtocart/:id", async (req, res) => {
 router.put("/removefromcart/:id", async (req, res) => {
   try {
     const productID = req.body.productID;
-    // const product = await Product.findById(productID);
-    // const price= product.price;
+    let product=0;
+    product = await Service.findById(productID).exec();
+   if(!product){
+      product = await Product.findById(productID);
+   }
+   const price = product.price;
     const quantity = req.body.quantity;
+    const cart= await Cart.findById(req.params.id).exec();
+    const totalsumprice= cart.totalsum-(quantity*price);
     // console.log(price);
     const updatedCart = await Cart.findByIdAndUpdate(
       req.params.id,
@@ -131,6 +172,11 @@ router.put("/removefromcart/:id", async (req, res) => {
             productId: productID,
           },
         },
+        $set : {
+          totalsum:
+           totalsumprice
+        }
+
         // $set :{ totalsum : price}
       },
       { new: true }

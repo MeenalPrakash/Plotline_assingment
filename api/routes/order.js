@@ -34,14 +34,16 @@ router.post("/", async (req, res) => {
 
 router.get("/bill/:userId", async (req, res) => {
   try {
-    const orders = await Order.findOne({ userId: req.params.userId });
-    const cart = await Cart.findOne({ userId: req.params.userId });
     const carts = await Cart.aggregate([
         { $addFields: { totalsum: { $sum: "$products.price" } } },
         { $out: "carts" },
       ]);
-    console.log(orders);
-    console.log(cart);
+    const orders = await Order.findOne({ userId: req.params.userId });
+    const cart = await Cart.findOne({ userId: req.params.userId });
+    orders.amount=cart.totalsum;
+    
+   // console.log(orders);
+   // console.log(carts);
     let arr = [{ orders, cart }];
     console.log(arr);
     res.status(200).json(arr);
