@@ -1,5 +1,5 @@
 const Product = require("../models/Product");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("../verifyToken");
+
 
 const router = require("express").Router();
 
@@ -70,7 +70,7 @@ router.get("/", async(req,res)=>{
 
 
 //UPDATE
-router.put("/:id",verifyTokenAndAuthorization,async (req,res)=>{
+router.put("/:id",async (req,res)=>{
     if(req.body.password){
         password = CryptoJS.AES.encrypt(
             req.body.password,
@@ -94,7 +94,7 @@ router.put("/:id",verifyTokenAndAuthorization,async (req,res)=>{
 
 //DELETE
 
-router.delete("/:id",verifyTokenAndAuthorization, async(req,res)=>{
+router.delete("/:id", async(req,res)=>{
     try {
         await Product.findByIdAndDelete(req.params.id)
         res.status(200).json("Product has been deleted!"); 

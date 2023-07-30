@@ -1,10 +1,10 @@
 const User = require("../models/User");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("../verifyToken");
+
 
 const router = require("express").Router();
 
 //GET BY ID
-router.get("/find/:id",verifyTokenAndAdmin, async(req,res)=>{
+router.get("/find/:id", async(req,res)=>{
     try {
         const user = await User.findById(req.params.id);
         const { password , ...info} = user._doc;
@@ -15,7 +15,7 @@ router.get("/find/:id",verifyTokenAndAdmin, async(req,res)=>{
     }
 } )
 // GET ALL USERS
-router.get("/",verifyTokenAndAdmin, async(req,res)=>{
+router.get("/", async(req,res)=>{
     const query = req.query.new
     try {
         
@@ -30,7 +30,7 @@ router.get("/",verifyTokenAndAdmin, async(req,res)=>{
 
 
 //UPDATE
-router.put("/:id",verifyTokenAndAuthorization,async (req,res)=>{
+router.put("/:id",async (req,res)=>{
     if(req.body.password){
         password = CryptoJS.AES.encrypt(
             req.body.password,
@@ -54,7 +54,7 @@ router.put("/:id",verifyTokenAndAuthorization,async (req,res)=>{
 
 //DELETE
 
-router.delete("/:id",verifyTokenAndAuthorization, async(req,res)=>{
+router.delete("/:id", async(req,res)=>{
     try {
         await User.findByIdAndDelete(req.params.id)
         res.status(200).json("User has been deleted!"); 
@@ -66,7 +66,7 @@ router.delete("/:id",verifyTokenAndAuthorization, async(req,res)=>{
 //GET USER STATS
 
 
-router.get("/stats",verifyTokenAndAdmin, async(req,res)=>{
+router.get("/stats", async(req,res)=>{
     const today = new Date();
 
     const lastYear = new Date (today.setFullYear(today.getFullYear()-1));

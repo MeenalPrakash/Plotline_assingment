@@ -1,9 +1,8 @@
 const Cart = require("../models/Cart");
-const {
-  verifyToken,
-  verifyTokenAndAuthorization,
-  verifyTokenAndAdmin,
-} = require("../verifyToken");
+const Product = require("../models/Product");
+const Service = require("../models/Service");
+const User = require("../models/User");
+
 
 const router = require("express").Router();
 
@@ -20,7 +19,7 @@ router.post("/", async (req, res) => {
 });
 
 //GET USER CART
-router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) => {
+router.get("/find/:userId",  async (req, res) => {
   try {
     const cart = await Cart.find({ userId: req.params.userId });
     res.status(200).json(cart);
@@ -40,10 +39,19 @@ router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) => {
 //     }
 // })
 // GET ALL CARTS
-router.get("/", verifyTokenAndAdmin, async (req, res) => {
+router.get("/",  async (req, res) => {
   try {
-    const carts = await Cart.find();
-    res.status(200).json(carts);
+    const user = await User.findOne({ email: req.body.email });
+    if(user.isAdmin){
+      const carts = await Cart.find();
+      res.status(200).json(carts);
+    }
+    else{
+      res.send("you are not aunthenticated");
+      res.status(500).json(err);
+      
+    }
+  
   } catch (err) {
     res.status(500).json(err);
   }
@@ -52,9 +60,8 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
 router.get("/gettotal/:id", async (req, res) => {
   try {
     const carts = await Cart.aggregate([
-    {$addFields: {totalsum : {$sum: "$products.price"}}},
-    {$out: "carts"}
-    
+      { $addFields: { totalsum: { $sum: "$products.price" } } },
+      { $out: "carts" },
     ]);
     res.status(200).json(carts);
   } catch (err) {
@@ -81,10 +88,15 @@ router.put("/:id", async (req, res) => {
 router.put("/addtocart/:id", async (req, res) => {
   try {
     const productID = req.body.productID;
-    // const product = await Product.findById(productID);
-    // const price= product.price;
+     let product=0;
+     product = await Service.findById(productID).exec();
+    if(!product){
+       product = await Product.findById(productID);
+    }
+
+    const price = product.price;
     const quantity = req.body.quantity;
-    // console.log(price);
+    console.log(price);
     const updatedCart = await Cart.findByIdAndUpdate(
       req.params.id,
       {
@@ -92,6 +104,7 @@ router.put("/addtocart/:id", async (req, res) => {
           products: {
             productId: productID,
             quantity: quantity,
+            price: price
           },
         },
         // $set :{ totalsum : price}
@@ -104,33 +117,32 @@ router.put("/addtocart/:id", async (req, res) => {
   }
 });
 router.put("/removefromcart/:id", async (req, res) => {
-    try {
-      const productID = req.body.productID;
-      // const product = await Product.findById(productID);
-      // const price= product.price;
-      const quantity = req.body.quantity;
-      // console.log(price);
-      const updatedCart = await Cart.findByIdAndUpdate(
-        req.params.id,
-        {
-          $pull: {
-            products: {
-              productId: productID
-             
-            },
+  try {
+    const productID = req.body.productID;
+    // const product = await Product.findById(productID);
+    // const price= product.price;
+    const quantity = req.body.quantity;
+    // console.log(price);
+    const updatedCart = await Cart.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: {
+          products: {
+            productId: productID,
           },
-          // $set :{ totalsum : price}
         },
-        { new: true }
-      );
-      res.status(200).json(updatedCart);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  });
+        // $set :{ totalsum : price}
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedCart);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 //DELETE
 
-router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
+router.delete("/:id",  async (req, res) => {
   try {
     await Cart.findByIdAndDelete(req.params.id);
     res.status(200).json("Cart has been deleted!");

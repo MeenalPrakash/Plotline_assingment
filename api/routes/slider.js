@@ -1,11 +1,11 @@
 const Slider = require("../models/Slider");
-const {verifyToken, verifyTokenAndAuthorization } = require("../verifyToken");
+
 
 const router = require("express").Router();
 
 // //CREATE PRODUCT
 
-router.post("/",verifyToken, async (req,res)=>{
+router.post("/", async (req,res)=>{
     const newSlider = new Slider(req.body);
     try {
         const savedSlider = await newSlider.save();
