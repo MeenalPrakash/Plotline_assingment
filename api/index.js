@@ -6,7 +6,7 @@ const userRoute = require("./routes/user");
 const authRoute = require("./routes/auth");
 const productRoute = require("./routes/product");
 const orderRoute = require("./routes/order");
-const sliderRoute = require("./routes/slider");
+
 const serviceRoute = require("./routes/service");
 const cartrouter= require("./routes/cart");
 const cors = require("cors");
@@ -29,7 +29,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/products", productRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/cart", cartrouter);
-app.use("/api/sliders", sliderRoute);
+
 app.use("/api/services", serviceRoute);
 
 app.listen(5000, () => {

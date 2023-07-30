@@ -14,13 +14,14 @@ const CartSchema = new mongoose.Schema(
         },
         products: [
             {
-                productId:{type:String, unique:true, required:true}, 
+                productId:{type:String, required:true}, 
                  quantity:{
                      type:Number,
                      default:1,
                  },
                 price:{type:Number},
-                isService:{type:Boolean}
+                isService:{type:Boolean},
+                priceWithoutTax:{type:Number}
 
             },
         ],

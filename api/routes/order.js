@@ -47,10 +47,7 @@ router.get("/getallorders/:id", async (req, res) => {
   });
 router.get("/bill/:userId", async (req, res) => {
   try {
-    const carts = await Cart.aggregate([
-        { $addFields: { totalsum: { $sum: "$products.price" } } },
-        { $out: "carts" },
-      ]);
+    
     const orders = await Order.findOne({ userId: req.params.userId });
     const cart = await Cart.findOne({ userId: req.params.userId });
     orders.amount=cart.totalsum;

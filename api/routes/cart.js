@@ -143,6 +143,7 @@ router.put("/addtocart/:id", async (req, res) => {
             productId: productID,
             quantity: quantity,
             price: newPrice,
+            priceWithoutTax: price
           },
         },
         $set: {
@@ -166,13 +167,34 @@ router.put("/removefromcart/:id", async (req, res) => {
     const productID = req.body.productID;
     let product = 0;
     product = await Service.findById(productID).exec();
+    let isService = 0;
     if (!product) {
+      isService = 1;
       product = await Product.findById(productID);
     }
     const price = product.price;
     const quantity = req.body.quantity;
+    let newPrice = 0;
+    if (isService == 1) {
+      if (price > 1000 && price <= 5000) {
+        newPrice = 0.12 * price + price;
+      } else if (price > 8000) {
+        newPrice = 0.18 * price + price;
+      } else {
+        newPrice = 200 + price;
+      }
+    } else {
+      if (price > 1000 && price <= 8000) {
+        9;
+        newPrice = 0.1 * price + price;
+      } else if (price > 8000) {
+        newPrice = 0.15 * price + price;
+      } else {
+        newPrice = 100 + price;
+      }
+    }
     const cart = await Cart.findById(req.params.id).exec();
-    const totalsumprice = cart.totalsum - quantity * price;
+    const totalsumprice = cart.totalsum - quantity * newPrice;
     // console.log(price);
     const updatedCart = await Cart.findByIdAndUpdate(
       req.params.id,
