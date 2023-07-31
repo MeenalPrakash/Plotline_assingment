@@ -14,19 +14,7 @@ router.get("/find/:id", async(req,res)=>{
         res.status(500).json(err);
     }
 } )
-// GET ALL USERS
-router.get("/", async(req,res)=>{
-    const query = req.query.new
-    try {
-        
-        const users = query 
-        ? await User.find().sort({_id:-1}).limit(5)
-        : await User.find();
-        res.status(200).json(users); 
-    } catch (err) {
-        res.status(500).json(err);
-    }
-} )
+
 
 
 //UPDATE
@@ -63,34 +51,9 @@ router.delete("/:id", async(req,res)=>{
     }
 } )
 
-//GET USER STATS
 
 
-router.get("/stats", async(req,res)=>{
-    const today = new Date();
 
-    const lastYear = new Date (today.setFullYear(today.getFullYear()-1));
-
-        try {
-            const data = await User.aggregate([ 
-                {$match: { createdAt : { $gte: lastYear } } },
-                {
-                    $project:{
-                        month : { $month:"$createdAt" }
-                    },
-                },
-                {
-                    $group:{
-                        _id: "$month",
-                        total:{$sum:1},
-                    }
-                }
-            ]);
-            res.status(200).json(data);
-        } catch (err) {
-            res.status(500).json(err);
-        }
-} )
 
 
 

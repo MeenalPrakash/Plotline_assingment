@@ -46,17 +46,23 @@ router.get("/", async (req, res) => {
 
 //UPDATE
 router.put("/:id", async (req, res) => {
-  if (req.body.password) {
-    password = CryptoJS.AES.encrypt(
-      req.body.password,
-      process.env.SECRET_KEY
-    ).toString();
+  const updatedprice=req.body.price;
+  let newPrice=0;
+  if (updatedprice > 1000 && updatedprice <= 5000) {
+    newPrice = 0.12 * updatedprice + updatedprice;
+  } else if (updatedprice > 8000) {
+    newPrice = 0.18 * updatedprice + updatedprice;
+  } else {
+    newPrice = 200 + updatedprice;
   }
+  
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
-        $set: req.body,
+        $set: {
+          price: newPrice
+        },
       },
       { new: true }
     );
@@ -66,15 +72,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-//DELETE
 
-router.delete("/:id", async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.status(200).json("Product has been deleted!");
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
 
 module.exports = router;
