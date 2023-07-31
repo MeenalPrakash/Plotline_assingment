@@ -29,7 +29,7 @@ router.post("/login", async (req, res) => {
     console.log(user);
 
     !user && res.status(401).json("Wrong password or Email!");
-    const bytes  = CryptoJS.AES.decrypt(user.password,"TsetsScret@102934");
+    const bytes  = CryptoJS.AES.decrypt(user.password,"TsetsScret@102934"); //THE mongo id and the Jwt secrets are not in the .env file because this is a private repo and the .env is not pushed on the github
     const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
     decryptedData !== req.body.password &&
      res.status(401).json("Wrong password or username!");
